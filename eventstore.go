@@ -12,15 +12,20 @@ import (
 
 	"time"
 
+	"sync"
+
 	"github.com/boltdb/bolt"
 	"github.com/olleman42/dinnerbot"
 )
 
 // EventStore holds helper methods to store events
 type EventStore struct {
-	Connection *bolt.DB
-	Ingest     chan []byte
-	errors     chan error
+	Connection    *bolt.DB
+	Ingest        chan []byte
+	errors        chan error
+	broadcast     chan []byte
+	listeners     []func([]byte)
+	listenerMutex *sync.Mutex
 }
 
 // NewEventStore creates and returns new event store
@@ -32,6 +37,10 @@ func NewEventStore() (*EventStore, error) {
 
 	store.Ingest = make(chan []byte)
 	go store.consumeEvents()
+
+	store.listenerMutex = &sync.Mutex{}
+	store.broadcast = make(chan []byte)
+	go store.feedListeners()
 
 	store.errors = make(chan error)
 	go store.handleErrors()
@@ -126,10 +135,9 @@ func (e *EventStore) StoreEvent(in []byte) error {
 		return errors.New("Invalid event timestamp")
 	}
 
-	return e.Connection.Update(func(tx *bolt.Tx) error {
+	err = e.Connection.Update(func(tx *bolt.Tx) error {
 		// create key based on unix timestamp of event (for easier querying)
 		key := []byte(fmt.Sprintf("%v", event.Timestamp.Format(time.RFC3339)))
-		fmt.Println(string(key))
 		// key := []byte(fmt.Sprintf("%v", event.Timestamp.Unix()))
 
 		// we need to index by aggtype->aggid->time, global->time, aggtype->time
@@ -165,6 +173,11 @@ func (e *EventStore) StoreEvent(in []byte) error {
 		// append on type->id buccket
 		return sb.Put(key, in)
 	})
+	if err != nil {
+		return err
+	}
+
+	return e.broadcastEvent(in)
 }
 
 // DumpEvents - dump events to writer
@@ -213,5 +226,26 @@ func dumpBucket(b *bolt.Bucket, w io.Writer) error {
 		_, err := fmt.Fprint(w, v)
 		return err
 	})
+}
 
+func (e *EventStore) broadcastEvent(event []byte) error {
+	e.broadcast <- event
+	return nil
+}
+
+func (e *EventStore) feedListeners() {
+	for v := range e.broadcast {
+		e.listenerMutex.Lock()
+		for _, listener := range e.listeners {
+			listener(v)
+		}
+		e.listenerMutex.Unlock()
+	}
+}
+
+// AddListener adds a callback function to be run when a new event gets emitted
+func (e *EventStore) AddListener(listener func([]byte)) {
+	e.listenerMutex.Lock()
+	e.listeners = append(e.listeners, listener)
+	e.listenerMutex.Unlock()
 }
