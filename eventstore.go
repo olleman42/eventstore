@@ -18,14 +18,24 @@ import (
 	"github.com/olleman42/dinnerbot"
 )
 
+type safeListeners struct {
+	*sync.RWMutex
+	Listeners []func([]byte) error
+}
+
+func (s *safeListeners) DoAction(action func(listeners *safeListeners) error) error {
+	s.Lock()
+	defer s.Unlock()
+	return action(s)
+}
+
 // EventStore holds helper methods to store events
 type EventStore struct {
-	Connection    *bolt.DB
-	Ingest        chan []byte
-	errors        chan error
-	broadcast     chan []byte
-	listeners     []func([]byte)
-	listenerMutex *sync.Mutex
+	Connection *bolt.DB
+	Ingest     chan []byte
+	errors     chan error
+	broadcast  chan []byte
+	listeners  *safeListeners
 }
 
 // NewEventStore creates and returns new event store
@@ -38,7 +48,7 @@ func NewEventStore() (*EventStore, error) {
 	store.Ingest = make(chan []byte)
 	go store.consumeEvents()
 
-	store.listenerMutex = &sync.Mutex{}
+	store.listeners = &safeListeners{&sync.RWMutex{}, make([]func([]byte) error, 0)}
 	store.broadcast = make(chan []byte)
 	go store.feedListeners()
 
@@ -235,17 +245,25 @@ func (e *EventStore) broadcastEvent(event []byte) error {
 
 func (e *EventStore) feedListeners() {
 	for v := range e.broadcast {
-		e.listenerMutex.Lock()
-		for _, listener := range e.listeners {
-			listener(v)
+		err := e.listeners.DoAction(func(listeners *safeListeners) error {
+			for _, listener := range e.listeners.Listeners {
+				err := listener(v)
+				if err != nil {
+					return err
+				}
+			}
+			return nil
+		})
+		if err != nil {
+			e.errors <- err
 		}
-		e.listenerMutex.Unlock()
 	}
 }
 
 // AddListener adds a callback function to be run when a new event gets emitted
-func (e *EventStore) AddListener(listener func([]byte)) {
-	e.listenerMutex.Lock()
-	e.listeners = append(e.listeners, listener)
-	e.listenerMutex.Unlock()
+func (e *EventStore) AddListener(listener func([]byte) error) error {
+	return e.listeners.DoAction(func(listeners *safeListeners) error {
+		listeners.Listeners = append(listeners.Listeners, listener)
+		return nil
+	})
 }
