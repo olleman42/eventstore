@@ -127,6 +127,7 @@ func (e *EventStore) Write(in []byte) (int, error) {
 // Relevant metadata is required
 func (e *EventStore) StoreEvent(in []byte) error {
 	// get generic event
+	// TODO: Check event version of latest event version to ensure that no conflict occurs
 	event, err := dish.GetGenericEvent(in) // TODO: Break out event-specific behaviour to interface
 	if err != nil {
 		return err
@@ -224,6 +225,7 @@ func (e *EventStore) GetTypeHistory(aggType, aggID string, w io.Writer) error {
 
 // GetHistory return a byte stream of all the events in the system ordered by timestamp
 func (e *EventStore) GetHistory(aggType, aggID string, w io.Writer) error {
+	// TODO Add functionality to also trickle out events that might have arrived since a read started, so no stray events disappear
 	return e.Connection.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("events"))
 
