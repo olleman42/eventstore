@@ -123,6 +123,16 @@ func (e *EventStore) Write(in []byte) (int, error) {
 	return len(in), nil
 }
 
+func (e *EventStore) cleanEvent(in []byte) ([]byte, error) {
+	var generic interface{}
+	if err := json.Unmarshal(in, generic); err != nil {
+		return nil, err
+	}
+
+	return json.MarshalIndent(generic, "", "  ")
+
+}
+
 // StoreEvent - store an event in its appropriate bucket
 // Relevant metadata is required
 func (e *EventStore) StoreEvent(in []byte) error {
@@ -144,6 +154,12 @@ func (e *EventStore) StoreEvent(in []byte) error {
 
 	if event.Timestamp.IsZero() {
 		return errors.New("Invalid event timestamp")
+	}
+
+	// clean up the event before storage
+	in, err = e.cleanEvent(in)
+	if err != nil {
+		return err
 	}
 
 	err = e.Connection.Update(func(tx *bolt.Tx) error {
