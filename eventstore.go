@@ -15,7 +15,7 @@ import (
 	"sync"
 
 	"github.com/boltdb/bolt"
-	"github.com/olleman42/dinnerbot"
+	"github.com/olleman42/dinnerbot/eventstore/event"
 )
 
 type safeListeners struct {
@@ -128,7 +128,7 @@ func (e *EventStore) Write(in []byte) (int, error) {
 func (e *EventStore) StoreEvent(in []byte) error {
 	// get generic event
 	// TODO: Check event version of latest event version to ensure that no conflict occurs
-	event, err := dish.GetGenericEvent(in) // TODO: Break out event-specific behaviour to interface
+	event, err := event.GetGenericEvent(in) // TODO: Break out event-specific behaviour to interface
 	if err != nil {
 		return err
 	}
