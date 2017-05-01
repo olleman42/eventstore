@@ -125,7 +125,7 @@ func (e *EventStore) Write(in []byte) (int, error) {
 
 func (e *EventStore) cleanEvent(in []byte) ([]byte, error) {
 	var generic interface{}
-	if err := json.Unmarshal(in, generic); err != nil {
+	if err := json.Unmarshal(in, &generic); err != nil {
 		return nil, err
 	}
 
