@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package eventstore;
+
+service EventStore {
+    rpc GetHistory(GetHistoryRequest) returns (stream Event) {}
+    rpc GetTypeHistory(GetTypeHistoryRequest) returns (stream Event) {}
+    rpc GetAggregateHistory(GetAggregateHistoryRequest) returns (stream Event) {}
+}
+
+message GetHistoryRequest {}
+
+message GetTypeHistoryRequest {
+    string Type = 1;
+}
+
+message GetAggregateHistoryRequest {
+    string Type = 1;
+    string AggregateID = 2;
+}
+
+message Event {
+    bytes Data = 1;
+}
