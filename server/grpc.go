@@ -1,6 +1,8 @@
 package server
 
 import (
+	context "golang.org/x/net/context"
+
 	"google.golang.org/grpc"
 
 	"github.com/olleman42/dinnerbot/eventstore"
@@ -36,6 +38,14 @@ func (g *gserver) GetTypeHistory(req *pb.GetTypeHistoryRequest, stream pb.EventS
 func (g *gserver) GetAggregateHistory(req *pb.GetAggregateHistoryRequest, stream pb.EventStore_GetAggregateHistoryServer) error {
 	grpcWriter := &grpcEventWriter{sender: stream}
 	return g.store.GetAggregateHistory(req.Type, req.AggregateID, grpcWriter)
+}
+
+func (g *gserver) StoreEvent(ctx context.Context, req *pb.StoreEventRequest) (*pb.StoreEventResponse, error) {
+	err := g.store.StoreEvent(req.Event)
+	if err != nil {
+		return &pb.StoreEventResponse{Error: err.Error()}, err
+	}
+	return &pb.StoreEventResponse{}, nil
 }
 
 // RegisterGRPCServer Get a grpc server connection (wrapping a listener) and an event store to provide client-compatible endpoints for querying event store

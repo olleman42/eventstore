@@ -6,6 +6,7 @@ service EventStore {
     rpc GetHistory(GetHistoryRequest) returns (stream Event) {}
     rpc GetTypeHistory(GetTypeHistoryRequest) returns (stream Event) {}
     rpc GetAggregateHistory(GetAggregateHistoryRequest) returns (stream Event) {}
+    rpc StoreEvent(StoreEventRequest) returns (StoreEventResponse) {}
 }
 
 message GetHistoryRequest {}
@@ -21,4 +22,12 @@ message GetAggregateHistoryRequest {
 
 message Event {
     bytes Data = 1;
+}
+
+message StoreEventRequest {
+    bytes Event = 1;
+}
+
+message StoreEventResponse {
+    string Error = 1;
 }
