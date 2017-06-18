@@ -29,5 +29,4 @@ message StoreEventRequest {
 }
 
 message StoreEventResponse {
-    string Error = 1;
 }

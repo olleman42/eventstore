@@ -43,7 +43,7 @@ func (g *gserver) GetAggregateHistory(req *pb.GetAggregateHistoryRequest, stream
 func (g *gserver) StoreEvent(ctx context.Context, req *pb.StoreEventRequest) (*pb.StoreEventResponse, error) {
 	err := g.store.StoreEvent(req.Event)
 	if err != nil {
-		return &pb.StoreEventResponse{Error: err.Error()}, err
+		return &pb.StoreEventResponse{}, err
 	}
 	return &pb.StoreEventResponse{}, nil
 }
