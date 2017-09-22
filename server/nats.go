@@ -7,8 +7,8 @@ import (
 	"github.com/olleman42/dinnerbot/eventstore"
 )
 
-// ConnectNATS registers a listener and a publisher on the NATS broker when provided a valid connection and event store
-func ConnectNATS(nc *nats.Conn, ess *eventstore.EventStore) error {
+// RegisterNATS registers a listener and a publisher on the NATS broker when provided a valid connection and event store
+func RegisterNATS(nc *nats.Conn, ess *eventstore.EventStore) error {
 	// TODO: Allow consumer to specify topics for receiving and dispatching events
 	if err := ess.AddListener(func(in []byte) error {
 		log.Printf("Dispatching event: %s", string(in))
