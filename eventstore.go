@@ -15,7 +15,7 @@ import (
 	"sync"
 
 	"github.com/boltdb/bolt"
-	"github.com/olleman42/dinnerbot/eventstore/event"
+	"github.com/olleman42/eventstore/event"
 )
 
 type safeListeners struct {
