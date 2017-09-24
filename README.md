@@ -3,7 +3,7 @@ eventstore [![GoDoc](https://godoc.org/github.com/olleman42/eventstore?status.sv
 
 eventstore is a boltdb-backed JSON event store with a small API to facilitate making simple CQRS applications
 
-The package is meant to be used as a library while letting the user dictate how the event store is to be exposed. There are helper server and client bindings to enable simpe communication with the store from other processes
+The package is meant to be used as a library while letting the user dictate how the event store is to be exposed. There are helper server and client bindings to enable simple communication with the store from other processes
 
 The package is in an early stage of development, so tests are missing and optimization is lacking.
 
