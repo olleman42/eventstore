@@ -1,3 +1,8 @@
+/*
+Package eventstore is a library which creates an embedded database and exposes and API for storing and retrieving events.
+
+The stored events must follow the shape of the type specified in the event sub-package
+*/
 package eventstore
 
 import (

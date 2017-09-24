@@ -1,3 +1,6 @@
+/*
+	Package event contains the type for the event shape which is stored in the store
+*/
 package event
 
 import (
