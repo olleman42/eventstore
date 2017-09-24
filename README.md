@@ -13,6 +13,7 @@ The required fields for an event store properly are the following:
 
 ```json
 {
+    "ID": "Event ID",
     "EventType": "Event type",
     "AggregateID": "Aggregate ID",
     "AggregateType": "Aggregate Type",
