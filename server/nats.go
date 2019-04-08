@@ -3,7 +3,7 @@ package server
 import (
 	"log"
 
-	"eventstore"
+	"github.com/olleman42/eventstore"
 
 	nats "github.com/nats-io/go-nats"
 )

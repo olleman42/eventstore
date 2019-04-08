@@ -5,8 +5,9 @@ import (
 
 	"google.golang.org/grpc"
 
-	"eventstore"
-	pb "eventstore/proto"
+	pb "github.com/olleman42/eventstore/proto"
+
+	"github.com/olleman42/eventstore"
 )
 
 type streamSender interface {

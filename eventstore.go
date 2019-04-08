@@ -19,7 +19,7 @@ import (
 
 	"sync"
 
-	"eventstore/event"
+	"github.com/olleman42/eventstore/event"
 
 	"github.com/boltdb/bolt"
 )

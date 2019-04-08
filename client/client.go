@@ -10,8 +10,8 @@ import (
 
 	"google.golang.org/grpc"
 
-	"eventstore/event"
-	pb "eventstore/proto"
+	"github.com/olleman42/eventstore/event"
+	pb "github.com/olleman42/eventstore/proto"
 )
 
 // ESClient a wrapper library to easily query the event store
