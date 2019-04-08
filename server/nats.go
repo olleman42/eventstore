@@ -3,8 +3,9 @@ package server
 import (
 	"log"
 
+	"eventstore"
+
 	nats "github.com/nats-io/go-nats"
-	"github.com/olleman42/eventstore"
 )
 
 // RegisterNATS registers a listener and a publisher on the NATS broker when provided a valid connection and event store

@@ -6,7 +6,7 @@ import (
 	"log"
 	"net"
 
-	"github.com/olleman42/eventstore"
+	"eventstore"
 )
 
 const (
