@@ -96,9 +96,17 @@ func (e *EventStore) handleErrors() {
 // Creates the database connection
 func (e *EventStore) connect() error {
 	db, err := bolt.Open("events.db", 0600, nil)
+	if err != nil {
+		return err
+	}
 	e.Connection = db
 
-	return err
+	// init bucket if it does not exist
+	return e.Connection.Update(func(tx *bolt.Tx) error {
+		_, err := tx.CreateBucketIfNotExists([]byte("events"))
+		return err
+	})
+	//return err
 }
 
 // ImportEvents - Imports events from json stream
@@ -226,6 +234,9 @@ func (e *EventStore) DumpEvents(w io.Writer) error {
 }
 
 func dumpBucket(b *bolt.Bucket, w io.Writer) error {
+	if b == nil {
+		return errors.New("store not intitialized with data")
+	}
 	return b.ForEach(func(k, v []byte) error {
 		_, err := w.Write(v)
 		return err
