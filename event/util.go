@@ -70,7 +70,7 @@ func DecodeStreamToEvents(r io.Reader, deserializeEvent func([]byte) (interface{
 }
 
 // DecodeStreamToChan decodes and event stream to typed events that are then published on a specified channel
-func DecodeStreamToChan(r io.Reader, sink chan Applyable, done chan bool, deserializeEvent func([]byte) (interface{}, error)) {
+func DecodeStreamToChan(r io.Reader, sink chan Applyable, deserializeEvent func([]byte) (Applyable, error)) {
 	dec := json.NewDecoder(r)
 
 	for dec.More() {
@@ -79,7 +79,6 @@ func DecodeStreamToChan(r io.Reader, sink chan Applyable, done chan bool, deseri
 			fmt.Println("Failed decoing event JSON, resetting encoder")
 			dec = json.NewDecoder(r)
 		}
-
 		typedEvent, err := deserializeEvent(rawEvent)
 		if err != nil {
 			if err == ErrorUnknownEvent {
@@ -92,5 +91,4 @@ func DecodeStreamToChan(r io.Reader, sink chan Applyable, done chan bool, deseri
 		sink <- typedEvent.(Applyable)
 	}
 	close(sink)
-	done <- true
 }

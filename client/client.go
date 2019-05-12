@@ -35,6 +35,7 @@ func connectPipe(stream receiver) io.Reader {
 		for {
 			event, err := stream.Recv()
 			if err == io.EOF {
+				pw.Close()
 				break
 			}
 			if err != nil {
@@ -84,8 +85,8 @@ func (esc *ESClient) GetHistory() (io.Reader, error) {
 }
 
 // StoreEvent stores specified event in the store
-func (esc *ESClient) StoreEvent(event event.Event) error {
-	encoded, err := json.Marshal(event)
+func (esc *ESClient) StoreEvent(evt event.Applyable) error {
+	encoded, err := json.Marshal(evt)
 	if err != nil {
 		return err
 	}
