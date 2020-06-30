@@ -14,6 +14,14 @@ import (
 	pb "github.com/olleman42/eventstore/proto"
 )
 
+// Client allows for decoupling testing client abstraction implementations that talk to the eventstore
+type Client interface {
+	GetAggregateHistory(aggregateType, aggregateID string) (io.Reader, error)
+	GetTypeHistory(aggregateType string) (io.Reader, error)
+	GetHistory() (io.Reader, error)
+	StoreEvent(evt event.Applyable) error
+}
+
 // ESClient a wrapper library to easily query the event store
 type ESClient struct {
 	Client pb.EventStoreClient

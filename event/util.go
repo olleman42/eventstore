@@ -44,7 +44,7 @@ func DecodeJSONArrayToEvents(in []byte, deserializeEvent func([]byte) (interface
 	return outEvents, nil
 }
 
-// DecodeStreamToEvents decoes a stream of json events (not array) to typed events
+// DecodeStreamToEvents decodes a stream of json events (not array) to typed events
 func DecodeStreamToEvents(r io.Reader, deserializeEvent func([]byte) (interface{}, error)) ([]interface{}, error) {
 	outEvents := []interface{}{}
 	dec := json.NewDecoder(r)
@@ -64,6 +64,31 @@ func DecodeStreamToEvents(r io.Reader, deserializeEvent func([]byte) (interface{
 			}
 		}
 		outEvents = append(outEvents, typedEvent)
+	}
+
+	return outEvents, nil
+}
+
+// DecodeStreamToApplyableEvents decodes a stream of json events (inline JSON) to typed applyable events
+func DecodeStreamToApplyableEvents(r io.Reader, deserializeEvent func([]byte) (Applyable, error)) ([]Applyable, error) {
+	outEvents := []Applyable{}
+	dec := json.NewDecoder(r)
+
+	for dec.More() {
+		var rawEvent json.RawMessage
+		if err := dec.Decode(&rawEvent); err != nil {
+			return nil, err
+		}
+
+		typedEvent, err := deserializeEvent(rawEvent)
+		if err != nil {
+			if err == ErrorUnknownEvent {
+				fmt.Println(err)
+			} else {
+				return nil, err
+			}
+		}
+		outEvents = append(outEvents, typedEvent.(Applyable))
 	}
 
 	return outEvents, nil
